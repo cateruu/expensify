@@ -5,6 +5,7 @@ import { userValidation } from '../validation/users.validation';
 import { ZodError } from 'zod';
 import { generateToken } from '../utils/generateToken';
 import { Token } from '../models/tokens.model';
+import { Error } from 'mongoose';
 
 const router = express.Router();
 
@@ -23,7 +24,9 @@ router.post('/register', async (req, res) => {
     res.status(201).json(addedUser);
     await addedUser.save();
   } catch (error) {
-    throw new Error('unable to create new user');
+    if (error instanceof Error) {
+      res.status(403).json({ message: error.message });
+    }
   }
 });
 

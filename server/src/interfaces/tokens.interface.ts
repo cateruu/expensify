@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
-export interface TokenPair {
+export interface TokenPair extends Document {
   userId: mongoose.ObjectId;
   access: string;
   refresh: string;

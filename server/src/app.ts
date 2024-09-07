@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import mainRouter from './routes/main.route';
 import usersRouter from './routes/users.route';
+import expensesRouter from './routes/expenses.route';
 import { connect } from 'mongoose';
 import { errorHandler } from './middlewares/errors.middleware';
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/', mainRouter);
 app.use('/users', usersRouter);
+app.use('/expenses', expensesRouter);
 
 (async () => {
   try {
