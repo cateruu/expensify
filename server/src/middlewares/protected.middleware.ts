@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { Token } from '../models/tokens.model';
 import mongoose from 'mongoose';
+import { ForbiddenError } from '../errors/forbidden.error';
+import { UnAuthorizedError } from '../errors/unathorized.error';
 
 declare global {
   namespace Express {
@@ -19,12 +21,12 @@ export const verifyAccessToken = async (
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ message: 'Permission denied' });
+    throw new UnAuthorizedError('Permission denied');
   }
 
   const tokenDoc = await Token.findOne({ access: token }).populate('userId');
   if (!tokenDoc || tokenDoc.accessExpires < new Date()) {
-    return res.status(403).json({ message: 'Invalid or Expired access token' });
+    throw new ForbiddenError('Invalid or Expired access token');
   }
 
   req.userId = tokenDoc.userId;

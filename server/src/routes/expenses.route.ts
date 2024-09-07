@@ -5,6 +5,9 @@ import { Expense } from '../interfaces/expenses.interface';
 import { expenseValidation } from '../validation/expenses.validation';
 import { ZodError } from 'zod';
 import { Error } from 'mongoose';
+import { NotFoundError } from '../errors/notFound.error';
+import { BadRequestError } from '../errors/badRequest.error';
+import { ForbiddenError } from '../errors/forbidden.error';
 
 const router = express.Router();
 
@@ -14,7 +17,7 @@ router.get('/', async (req, res) => {
   const expenses = await Expenses.find({ userId: req.userId });
 
   if (expenses.length <= 0) {
-    return res.status(404).json({ message: 'expenses not found' });
+    throw new NotFoundError('expenses not found');
   }
 
   res.json(expenses);
@@ -28,7 +31,10 @@ router.post('/', async (req, res) => {
     expenseValidation.parse(expense);
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json(error.flatten().fieldErrors);
+      throw new BadRequestError(
+        'failed validation',
+        error.flatten().fieldErrors
+      );
     }
   }
 
@@ -38,7 +44,7 @@ router.post('/', async (req, res) => {
     res.json(expenseDoc);
   } catch (error) {
     if (error instanceof Error) {
-      res.status(403).json({ message: error.message });
+      throw new ForbiddenError(error.message);
     }
   }
 });
@@ -50,14 +56,14 @@ router.get('/:id', async (req, res) => {
     const expense = await Expenses.findById(id);
 
     if (!expense) {
-      return res.status(404).json({ message: 'expense not found' });
+      throw new NotFoundError('expenses not found');
     }
 
     res.json(expense);
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('Cast to ObjectId failed')) {
-        res.status(404).json({ message: 'expense not found' });
+        throw new NotFoundError('expenses not found');
       }
     }
   }
@@ -71,7 +77,7 @@ router.patch('/:id', async (req, res) => {
     const expenseDoc = await Expenses.findById(id);
 
     if (!expenseDoc) {
-      return res.status(404).json({ message: 'expense not found' });
+      throw new NotFoundError('expenses not found');
     }
 
     if (name) {
@@ -92,7 +98,7 @@ router.patch('/:id', async (req, res) => {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('Cast to ObjectId failed')) {
-        res.status(404).json({ message: 'expense not found' });
+        throw new NotFoundError('expenses not found');
       }
     }
   }

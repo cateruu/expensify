@@ -6,6 +6,9 @@ import { ZodError } from 'zod';
 import { generateToken } from '../utils/generateToken';
 import { Token } from '../models/tokens.model';
 import { Error } from 'mongoose';
+import { BadRequestError } from '../errors/badRequest.error';
+import { ForbiddenError } from '../errors/forbidden.error';
+import { UnAuthorizedError } from '../errors/unathorized.error';
 
 const router = express.Router();
 
@@ -15,7 +18,10 @@ router.post('/register', async (req, res) => {
     userValidation.parse(user);
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json(error.flatten().fieldErrors);
+      throw new BadRequestError(
+        'validation failed',
+        error.flatten().fieldErrors
+      );
     }
   }
 
@@ -25,7 +31,7 @@ router.post('/register', async (req, res) => {
     await addedUser.save();
   } catch (error) {
     if (error instanceof Error) {
-      res.status(403).json({ message: error.message });
+      throw new ForbiddenError(error.message);
     }
   }
 });
@@ -35,7 +41,7 @@ router.post('/login', async (req, res) => {
 
   const user = await Users.findOne({ email }, 'password');
   if (!user || !user.comparePassword(password)) {
-    return res.status(401).json({ message: 'Invalid credentials' });
+    throw new UnAuthorizedError('Invalid credentials');
   }
 
   const accessToken = generateToken();
@@ -62,9 +68,7 @@ router.post('/refresh', async (req, res) => {
   );
 
   if (!tokenDoc || tokenDoc.refreshExpires < new Date()) {
-    return res
-      .status(403)
-      .json({ message: 'Invalid or Expired refresh token' });
+    throw new ForbiddenError('Invalid or Expired refresh token');
   }
 
   const newAccessToken = generateToken();

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import 'express-async-errors';
 import express from 'express';
 import mainRouter from './routes/main.route';
 import usersRouter from './routes/users.route';
