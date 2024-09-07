@@ -5,10 +5,11 @@ import { userValidation } from '../validation/users.validation';
 import { ZodError } from 'zod';
 import { generateToken } from '../utils/generateToken';
 import { Token } from '../models/tokens.model';
-import { Error } from 'mongoose';
+import { Error, MongooseError } from 'mongoose';
 import { BadRequestError } from '../errors/badRequest.error';
 import { ForbiddenError } from '../errors/forbidden.error';
 import { UnAuthorizedError } from '../errors/unathorized.error';
+import { DuplicateError } from '../errors/duplicate.error';
 
 const router = express.Router();
 
@@ -32,6 +33,9 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     if (error instanceof Error) {
       throw new ForbiddenError(error.message);
+    }
+    if ((error as { code: number }).code === 11000) {
+      throw new DuplicateError('user already exists');
     }
   }
 });
