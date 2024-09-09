@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import 'express-async-errors';
 import express from 'express';
+import cors from 'cors';
 import mainRouter from './routes/main.route';
 import usersRouter from './routes/users.route';
 import expensesRouter from './routes/expenses.route';
@@ -11,6 +12,7 @@ const PORT = process.env.PORT;
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/', mainRouter);
