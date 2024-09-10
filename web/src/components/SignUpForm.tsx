@@ -4,11 +4,11 @@ import React from 'react';
 import { useFormState } from 'react-dom';
 import Input from './Input';
 import Submit from './Submit';
-import { SigninFormState } from '@/lib/definitions';
+import { SignupFormState } from '@/lib/definitions';
 
 interface Props {
-  onSignin: (
-    state: SigninFormState,
+  onSignup: (
+    state: SignupFormState,
     formData: FormData
   ) => Promise<
     | {
@@ -25,8 +25,8 @@ interface Props {
   >;
 }
 
-function SignInForm({ onSignin }: Props) {
-  const [state, action] = useFormState(onSignin, undefined);
+function SignUpForm({ onSignup }: Props) {
+  const [state, action] = useFormState(onSignup, undefined);
 
   return (
     <>
@@ -34,12 +34,14 @@ function SignInForm({ onSignin }: Props) {
         <div className='mt-2 w-full bg-red-950 border-[1px] border-red-800 rounded-xl p-2'>
           {Object.keys(state.errors).map((key) => (
             <p key={key} className='text-xs text-red-400'>
-              {state.errors[key as keyof SigninFormState]}
+              {state.errors[key as keyof SignupFormState]}
             </p>
           ))}
         </div>
       )}
+
       <form action={action} className='flex flex-col gap-2 mt-5'>
+        <Input name='name' type='text' placeholder='Name' fullWidth />
         <Input name='email' type='text' placeholder='Email' fullWidth />
         <Input
           name='password'
@@ -47,10 +49,10 @@ function SignInForm({ onSignin }: Props) {
           placeholder='Password'
           fullWidth
         />
-        <Submit text='Sign In' />
+        <Submit text='Sign Up' />
       </form>
     </>
   );
 }
 
-export default SignInForm;
+export default SignUpForm;

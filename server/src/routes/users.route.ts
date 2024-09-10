@@ -42,12 +42,13 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { email, password }: User = req.body;
-  console.log(email, password);
 
   const user = await Users.findOne({ email }, 'password');
   if (!user || !user.comparePassword(password)) {
     throw new UnAuthorizedError('Invalid credentials');
   }
+
+  await Token.deleteMany({ userId: user._id });
 
   const accessToken = generateToken();
   const refreshToken = generateToken();
@@ -65,8 +66,8 @@ router.post('/login', async (req, res) => {
   res.json({ accessToken, refreshToken });
 });
 
-router.post('/refresh', async (req, res) => {
-  const { refreshToken } = req.body;
+router.get('/refresh', async (req, res) => {
+  const refreshToken = req.headers['refresh-token'];
 
   const tokenDoc = await Token.findOne({ refresh: refreshToken }).populate(
     'userId'
@@ -80,7 +81,7 @@ router.post('/refresh', async (req, res) => {
   const newRefreshToken = generateToken();
 
   tokenDoc.access = newAccessToken;
-  tokenDoc.refresh = newAccessToken;
+  tokenDoc.refresh = newRefreshToken;
   tokenDoc.accessExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
   tokenDoc.refreshExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
